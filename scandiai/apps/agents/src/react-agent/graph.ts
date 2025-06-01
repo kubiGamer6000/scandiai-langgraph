@@ -7,9 +7,9 @@ import { ConfigurationSchema, ensureConfiguration } from "./configuration.js";
 import { TOOLS } from "./tools.js";
 import { loadChatModel } from "./utils.js";
 
-const StateAnnotation = {
-  ...MessagesAnnotation,
-};
+// const StateAnnotation = {
+//   ...MessagesAnnotation.spec,
+// };
 
 // Define the function that calls the model
 async function callModel(
@@ -40,9 +40,14 @@ async function callModel(
 // Define the function that determines whether to continue or not
 function routeModelOutput(state: typeof MessagesAnnotation.State): string {
   const messages = state.messages;
-  const lastMessage = messages[messages.length - 1];
+
+  const lastMessage = messages[messages.length - 1] as AIMessage;
   // If the LLM is invoking tools, route there.
-  if ((lastMessage as AIMessage)?.tool_calls?.length || 0 > 0) {
+  if (lastMessage?.tool_calls?.length || 0 > 0) {
+    // If the tool call is a response, end the graph
+    if (lastMessage?.tool_calls?.[0].name === "RespondWithWhatsappMessage") {
+      return "__end__";
+    }
     return "tools";
   }
   // Otherwise end the graph.
@@ -66,7 +71,13 @@ const workflow = new StateGraph(MessagesAnnotation, ConfigurationSchema)
     "callModel",
     // Next, we pass in the function that will determine the sink node(s), which
     // will be called after the source node is called.
-    routeModelOutput
+    routeModelOutput,
+    // We supply a map of possible response values to the conditional edge
+    // to make it possible to draw a visualization of the graph
+    {
+      __end__: "__end__",
+      tools: "tools",
+    }
   )
   // This means that after `tools` is called, `callModel` node is called next.
   .addEdge("tools", "callModel");

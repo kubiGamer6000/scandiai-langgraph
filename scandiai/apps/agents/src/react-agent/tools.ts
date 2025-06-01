@@ -2,15 +2,71 @@
  * This file defines the tools available to the ReAct agent.
  * Tools are functions that the agent can use to interact with external systems or perform specific tasks.
  */
-import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
+import { tool } from "@langchain/core/tools";
+import { TavilySearch } from "@langchain/tavily";
+import { WhatsappMessageArraySchema } from "./schemas.js";
+// import {
+//   GoogleCalendarCreateTool,
+//   GoogleCalendarViewTool,
+// } from "@langchain/community/tools/google_calendar";
 
 /**
  * Tavily search tool configuration
  * This tool allows the agent to perform web searches using the Tavily API.
  */
-const searchTavily = new TavilySearchResults({
-  maxResults: 3,
+const searchTavily = new TavilySearch({
+  maxResults: 6,
+  topic: "general",
+  searchDepth: "advanced",
+
+  // includeAnswer: false,
+  // includeRawContent: false,
+  // includeImages: false,
+  // includeImageDescriptions: false,
+  // searchDepth: "basic",
+  // timeRange: "day",
+  // includeDomains: [],
+  // excludeDomains: [],
 });
+
+const finalResponseTool = tool(async () => "mocked value", {
+  name: "RespondWithWhatsappMessage",
+  description: `Always respond to the user using this tool. 
+    You can send multiple messages if you want, or use reaction messages to react to a specific message earlier in the chat.
+    Here is how you should send a text message:
+
+{ "text": "hello" }
+
+Here is how you should send a reaction:
+{
+  "react": {
+    "text": "💖",
+    "key": {
+      "remoteJid": "1234@s.whatsapp.net",
+      "fromMe": false,
+      "id": "ASDF123"
+    }
+  }
+}
+`,
+  schema: WhatsappMessageArraySchema,
+});
+
+/**
+ * Google Calendar tools configuration
+ * This tool allows the agent to create and view events in the user's Google Calendar.
+ */
+// const googleCalendarParams = {
+//   credentials: {
+//     clientEmail: process.env.GOOGLE_CALENDAR_CLIENT_EMAIL,
+//     privateKey: process.env.GOOGLE_CALENDAR_PRIVATE_KEY,
+//     calendarId: process.env.GOOGLE_CALENDAR_CALENDAR_ID,
+//   },
+//   scopes: [
+//     "https://www.googleapis.com/auth/calendar",
+//     "https://www.googleapis.com/auth/calendar.events",
+//   ],
+// };
 
 /**
  * Export an array of all available tools
@@ -20,4 +76,4 @@ const searchTavily = new TavilySearchResults({
  * and add them to this array.
  * See https://js.langchain.com/docs/how_to/custom_tools/#tool-function for more information.
  */
-export const TOOLS = [searchTavily];
+export const TOOLS = [searchTavily, finalResponseTool];
