@@ -61,6 +61,11 @@ const JoinMeetingSchema = z.object({
     .string()
     .url()
     .describe("A valid link to a Google Meet or Zoom meeting"),
+  chatJid: z
+    .string()
+    .describe(
+      "The current chat id of the chat that the meeting was requested in."
+    ),
   botName: z
     .string()
     .describe(
@@ -85,6 +90,9 @@ const joinMeetingTool = tool(
           openai: {
             model: "gpt-4o-transcribe",
           },
+        },
+        metadata: {
+          jid: input.chatJid,
         },
       },
     };
