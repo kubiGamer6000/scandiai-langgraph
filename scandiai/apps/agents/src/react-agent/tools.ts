@@ -33,28 +33,28 @@ const searchTavily = new TavilySearch({
   // excludeDomains: [],
 });
 
-const finalResponseTool = tool(async () => "mocked value", {
-  name: "RespondWithWhatsappMessage",
-  description: `Always respond to the user using this tool. 
-    You can send multiple messages if you want, or use reaction messages to react to a specific message earlier in the chat.
-    Here is how you should send a text message:
+// const finalResponseTool = tool(async () => "mocked value", {
+//   name: "RespondWithWhatsappMessage",
+//   description: `Always respond to the user using this tool.
+//     You can send multiple messages if you want, or use reaction messages to react to a specific message earlier in the chat.
+//     Here is how you should send a text message:
 
-{ "text": "hello" }
+// { "text": "hello" }
 
-Here is how you should send a reaction:
-{
-  "react": {
-    "text": "💖",
-    "key": {
-      "remoteJid": "1234@s.whatsapp.net",
-      "fromMe": false,
-      "id": "ASDF123"
-    }
-  }
-}
-`,
-  schema: WhatsappMessageArraySchema,
-});
+// Here is how you should send a reaction:
+// {
+//   "react": {
+//     "text": "💖",
+//     "key": {
+//       "remoteJid": "1234@s.whatsapp.net",
+//       "fromMe": false,
+//       "id": "ASDF123"
+//     }
+//   }
+// }
+// `,
+//   schema: WhatsappMessageArraySchema,
+// });
 
 const JoinMeetingSchema = z.object({
   meetingLink: z
@@ -137,4 +137,4 @@ const joinMeetingTool = tool(
  * and add them to this array.
  * See https://js.langchain.com/docs/how_to/custom_tools/#tool-function for more information.
  */
-export const TOOLS = [searchTavily, finalResponseTool, joinMeetingTool];
+export const TOOLS = [searchTavily, joinMeetingTool];
