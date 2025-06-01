@@ -75,7 +75,7 @@ const joinMeetingTool = tool(
       method: "POST",
       url: "https://app.attendee.dev/api/v1/bots",
       headers: {
-        Authorization: "Token ycSiGjHsuXBTHA4rmf9OzrqkMPhy806R",
+        Authorization: "Token " + process.env.ATTENDEE_API_KEY,
         "Content-Type": "application/json",
       },
       data: {
@@ -129,4 +129,4 @@ const joinMeetingTool = tool(
  * and add them to this array.
  * See https://js.langchain.com/docs/how_to/custom_tools/#tool-function for more information.
  */
-export const TOOLS = [searchTavily, finalResponseTool];
+export const TOOLS = [searchTavily, finalResponseTool, joinMeetingTool];
