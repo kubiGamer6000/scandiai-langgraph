@@ -5,7 +5,11 @@
 import { tool } from "@langchain/core/tools";
 import { TavilySearch } from "@langchain/tavily";
 import { WhatsappMessageArraySchema } from "./schemas.js";
+import { z } from "zod";
+import axios from "axios";
+
 // import {
+
 //   GoogleCalendarCreateTool,
 //   GoogleCalendarViewTool,
 // } from "@langchain/community/tools/google_calendar";
@@ -51,6 +55,55 @@ Here is how you should send a reaction:
 `,
   schema: WhatsappMessageArraySchema,
 });
+
+const JoinMeetingSchema = z.object({
+  meetingLink: z
+    .string()
+    .url()
+    .describe("A valid link to a Google Meet or Zoom meeting"),
+  botName: z
+    .string()
+    .describe(
+      "The name of the bot to join the meeting. ONLY use if user specified specific name, otherwise it defaults to 'Notetaker'"
+    )
+    .optional(),
+});
+
+const joinMeetingTool = tool(
+  async (input: z.infer<typeof JoinMeetingSchema>) => {
+    const options = {
+      method: "POST",
+      url: "https://app.attendee.dev/api/v1/bots",
+      headers: {
+        Authorization: "Token ycSiGjHsuXBTHA4rmf9OzrqkMPhy806R",
+        "Content-Type": "application/json",
+      },
+      data: {
+        meeting_url: input.meetingLink,
+        bot_name: input.botName || "Notetaker",
+        transcription_settings: {
+          openai: {
+            model: "gpt-4o-transcribe",
+          },
+        },
+      },
+    };
+
+    try {
+      const { data } = await axios.request(options);
+
+      return `Success! Response: Meeting bot with ID ${data.id}, status ${data.state}, transcription state ${data.transcription_state}, recording state ${data.recording_state}, meeting URL: ${data.meeting_url}.`;
+    } catch (error) {
+      console.error(error);
+      return `Error: ${error}`;
+    }
+  },
+  {
+    name: "JoinMeeting",
+    description: `Send a recording bot to join an online meeting. The bot provides a transcript and recording. Always let the user know the meeting bot id.`,
+    schema: JoinMeetingSchema,
+  }
+);
 
 /**
  * Google Calendar tools configuration
